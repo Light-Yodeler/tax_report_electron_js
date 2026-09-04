@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Production build outputs
+dist/
+dist-electron/
+release/
+
+# SQLite databases & temp files
+*.sqlite
+*.sqlite-journal
+*.db
+arsip_excel/
+
+# macOS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & local files
+.env
+.env.local
+
+# Local app binaries or symlinks
+*.app
