@@ -16,7 +16,7 @@ export default function ReportTable({ rows = [], totalRevenue = 0, taxDue = 0, u
             <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100">
               Rekapitulasi Kalender Pendapatan ({unit})
             </h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">Rincian omset harian resmi untuk verifikasi laporan Bapenda</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Rincian omset harian resmi untuk verifikasi laporan pajak</p>
           </div>
         </div>
 

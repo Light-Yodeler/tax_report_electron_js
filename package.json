@@ -1,7 +1,7 @@
 {
-  "name": "laporan-pajak-bapenda",
+  "name": "tax-report-app",
   "version": "1.0.0",
-  "description": "Aplikasi Rekapitulasi Pendapatan & Pelaporan Pajak Daerah Bapenda untuk Anda Bungalows & Restaurant",
+  "description": "Aplikasi Rekapitulasi Pendapatan & Pelaporan Pajak Usaha untuk Anda Bungalows & Restaurant",
   "main": "electron/main.js",
   "scripts": {
     "dev:react": "vite",
@@ -14,8 +14,8 @@
     "build:all": "vite build && electron-builder -mw"
   },
   "build": {
-    "appId": "com.andabungalows.laporanbapenda",
-    "productName": "Laporan Bapenda Anda",
+    "appId": "com.andabungalows.taxreport",
+    "productName": "Laporan Pajak Anda",
     "directories": {
       "output": "release"
     },
@@ -64,8 +64,8 @@
     "electron",
     "react",
     "vite",
-    "bapenda",
-    "tax-report"
+    "tax-report",
+    "pajak-usaha"
   ],
   "author": "Anda Bungalows & Restaurant",
   "license": "ISC",

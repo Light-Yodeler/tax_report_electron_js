@@ -92,7 +92,7 @@ async function initDatabase() {
     taxRate: '0.10', // 10%
     signName: 'Pimpinan / Pengelola',
     signPosition: 'Wajib Pajak Daerah',
-    officerName: 'Petugas Bapenda Lombok Tengah',
+    officerName: 'Petugas Pajak Daerah',
     officerNip: 'NIP. 19800101 200501 1 001'
   };
 

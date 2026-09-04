@@ -15,7 +15,7 @@ async function createWindow() {
     height: 900,
     minWidth: 1050,
     minHeight: 700,
-    title: 'Pelaporan Pajak Daerah Bapenda - Anda Bungalows & Restaurant',
+    title: 'Rekapitulasi & Pelaporan Pajak Usaha - Anda Bungalows & Restaurant',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
@@ -124,7 +124,7 @@ ipcMain.handle('db:cleanDuplicates', async (event, unit) => {
   }
 });
 
-// IPC: Export Bapenda Excel Report
+// IPC: Export Tax Excel Report
 ipcMain.handle('excel:exportReport', async (event, year, month) => {
   try {
     const settings = await dbService.getAllSettings();
@@ -136,10 +136,10 @@ ipcMain.handle('excel:exportReport', async (event, year, month) => {
       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
     ];
     const monthName = monthNamesIndo[month] || `Bulan_${month}`;
-    const defaultFilename = `Laporan_Bapenda_Anda_${monthName}_${year}.xlsx`;
+    const defaultFilename = `Laporan_Pajak_Anda_${monthName}_${year}.xlsx`;
 
     const saveResult = await dialog.showSaveDialog(mainWindow, {
-      title: 'Simpan Laporan Excel Bapenda',
+      title: 'Simpan Laporan Excel Pajak',
       defaultPath: defaultFilename,
       filters: [{ name: 'Excel Workbook', extensions: ['xlsx'] }]
     });
@@ -148,7 +148,7 @@ ipcMain.handle('excel:exportReport', async (event, year, month) => {
       return { canceled: true };
     }
 
-    await excelService.generateBapendaExcelReport(bungalowsData, restaurantData, saveResult.filePath, settings);
+    await excelService.generateTaxExcelReport(bungalowsData, restaurantData, saveResult.filePath, settings);
     return { success: true, filePath: saveResult.filePath };
   } catch (err) {
     return { success: false, error: err.message };

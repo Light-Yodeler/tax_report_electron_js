@@ -1,6 +1,6 @@
-# Laporan Pajak Bapenda
+# Rekapitulasi Pendapatan & Pelaporan Pajak Usaha
 
-Aplikasi desktop berbasis Electron dan React untuk merekapitulasi pendapatan harian, mengelola data transaksi dari berkas spreadsheet, menghitung kewajiban pajak daerah, dan mencetak laporan resmi sesuai format Bapenda.
+Aplikasi desktop berbasis Electron dan React untuk merekapitulasi pendapatan harian, mengelola data transaksi dari berkas spreadsheet, menghitung kewajiban pajak usaha daerah, dan mencetak laporan perpajakan resmi.
 
 Aplikasi ini dirancang untuk operasional dua unit usaha, yaitu Bungalows dan Restaurant, dengan pemisahan pencatatan transaksi dan konfigurasi profil wajib pajak masing-masing.
 
@@ -14,7 +14,7 @@ Aplikasi ini menyelesaikan alur kerja pelaporan pajak usaha daerah dari hulu ke 
 3. Mengarsipkan salinan fisik berkas Excel asli setiap kali proses impor dilakukan.
 4. Menghitung akumulasi pendapatan kotor, omset kena pajak, dan nominal pajak terutang secara otomatis.
 5. Menyajikan tinjauan visual melalui metrik keuangan, grafik tren pendapatan, dan tabel rekapitulasi harian.
-6. Mencetak lembar laporan fisik atau mengekspor berkas ke format PDF dan Excel siap setor ke instansi Bapenda.
+6. Mencetak lembar laporan fisik atau mengekspor berkas ke format PDF dan Excel siap setor.
 
 ---
 
@@ -42,7 +42,7 @@ Aplikasi ini menyelesaikan alur kerja pelaporan pajak usaha daerah dari hulu ke 
 - Rekapitulasi pendapatan harian otomatis untuk bulan dan tahun yang dipilih.
 - Penghitungan metrik operasional: total omset, pajak terutang (10%), pendapatan bersih, rata-rata omset per hari aktif, dan rekor omset harian tertinggi.
 - Ekspor laporan bulanan ke format spreadsheet Excel dengan format tabel akuntansi.
-- Antarmuka cetak laporan resmi yang telah disesuaikan dengan standar formulir pelaporan Bapenda, lengkap dengan ruang tanda tangan dan tanggal surat.
+- Antarmuka cetak laporan resmi yang telah disesuaikan dengan formulir pelaporan pajak usaha, lengkap dengan ruang tanda tangan dan tanggal surat.
 
 ### 6. Transparansi Lokasi Penyimpanan
 - Menu pengaturan menyediakan informasi detail mengenai sistem operasi yang aktif, lokasi file database SQLite, ukuran file di disk, jumlah transaksi tersimpan, dan path folder arsip berkas Excel.
@@ -159,13 +159,13 @@ npm run build:all
 Database SQLite dan berkas arsip disimpan secara terpisah dari kode aplikasi di folder data aplikasi pengguna:
 
 - **Windows**:
-  `%APPDATA%\laporan-pajak-bapenda\`
-  - Database: `laporan_bapenda.sqlite`
+  `%APPDATA%\tax-report-app\`
+  - Database: `database.sqlite`
   - Folder Arsip: `arsip_excel\`
 
 - **macOS**:
-  `~/Library/Application Support/laporan-pajak-bapenda/`
-  - Database: `laporan_bapenda.sqlite`
+  `~/Library/Application Support/tax-report-app/`
+  - Database: `database.sqlite`
   - Folder Arsip: `arsip_excel/`
 
 Data tersimpan secara persisten dan tidak akan terhapus saat aplikasi diperbarui.

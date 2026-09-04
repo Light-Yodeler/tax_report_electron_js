@@ -119,7 +119,7 @@ export default function App() {
     try {
       const res = await window.electronAPI.exportExcelReport(selectedYear, selectedMonth);
       if (res.success) {
-        showToast(`Laporan Bapenda berhasil diekspor ke: ${res.filePath}`, 'success');
+        showToast(`Laporan pajak berhasil diekspor ke: ${res.filePath}`, 'success');
       } else if (!res.canceled) {
         showToast(res.error || 'Gagal mengekspor file Excel.', 'error');
       }
@@ -206,7 +206,7 @@ export default function App() {
       {/* Main Container */}
       <main className="no-print flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
         
-        {/* VIEW 1: LAPORAN BAPENDA */}
+        {/* VIEW 1: REKAPITULASI LAPORAN */}
         {activeTab === 'report' && (
           <div className="space-y-6 animate-in fade-in">
             {/* Period Selector Bar */}
@@ -288,7 +288,7 @@ export default function App() {
       {/* Footer */}
       <footer className="no-print border-t border-slate-200 dark:border-slate-800/80 py-4 px-6 text-center text-xs text-slate-500 dark:text-slate-400">
         <p>
-          &copy; {new Date().getFullYear()} {settings?.businessName || 'ANDA BUNGALOWS & RESTAURANT'} &bull; Sistem Pelaporan Pajak Daerah (Bapenda)
+          &copy; {new Date().getFullYear()} {settings?.businessName || 'ANDA BUNGALOWS & RESTAURANT'} &bull; Sistem Pelaporan Pajak Usaha Daerah
         </p>
       </footer>
 

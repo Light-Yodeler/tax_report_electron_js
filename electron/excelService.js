@@ -231,10 +231,10 @@ function parseRawExcelFile(filePath) {
   return result;
 }
 
-// Generate official Bapenda Excel Report identical to template
-async function generateBapendaExcelReport(reportBungalows, reportRestaurant, outputPath, settings) {
+// Generate official tax Excel Report identical to template
+async function generateTaxExcelReport(reportBungalows, reportRestaurant, outputPath, settings) {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Sistem Pelaporan Bapenda (Anda Bungalows & Restaurant)';
+  workbook.creator = 'Sistem Pelaporan Pajak (Anda Bungalows & Restaurant)';
   workbook.created = new Date();
 
   const businessName = settings?.businessName || 'ANDA BUNGALOWS & RESTAURANT';
@@ -511,7 +511,7 @@ async function generateBapendaExcelReport(reportBungalows, reportRestaurant, out
 // Generate blank template Excel file for user data entry
 async function generateImportTemplate(unit = 'Bungalows', outputPath) {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'Laporan Bapenda Anda';
+  workbook.creator = 'Laporan Pajak Anda';
   workbook.created = new Date();
 
   const sheetName = `Input ${unit}`;
@@ -642,7 +642,8 @@ async function generateImportTemplate(unit = 'Bungalows', outputPath) {
 
 module.exports = {
   parseRawExcelFile,
-  generateBapendaExcelReport,
+  generateTaxExcelReport,
+  generateBapendaExcelReport: generateTaxExcelReport,
   generateImportTemplate
 };
 

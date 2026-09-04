@@ -326,7 +326,7 @@ function generateHtmlContent(reportData, settings, unit, year, month, options = 
         <span>Tahun: <strong>${year}</strong></span>
       </div>
       <div>
-        <span>Tarif Pajak Daerah: <strong>${(taxRate * 100).toFixed(0)}% (Bapenda)</strong></span>
+        <span>Tarif Pajak Daerah: <strong>${(taxRate * 100).toFixed(0)}%</strong></span>
       </div>
     </div>
 
@@ -420,7 +420,7 @@ function generateHtmlContent(reportData, settings, unit, year, month, options = 
         <div class="signatures">
           <div>
             <div style="color: #64748b; font-size: 8px;">Mengetahui / Menyetujui,</div>
-            <div style="font-weight: 700; color: #1e293b;">Petugas Pajak Daerah Bapenda</div>
+            <div style="font-weight: 700; color: #1e293b;">Petugas Pajak Daerah</div>
             <div class="sign-space"></div>
             <div style="font-weight: 700; color: #0f172a;">( ............................................ )</div>
             <div style="color: #64748b; font-size: 7.5px;">NIP. ........................................</div>

@@ -49,7 +49,7 @@ export default function MetricCards({ data }) {
           <div className="text-lg font-bold text-rose-600 dark:text-rose-300 tracking-tight">
             {formatRupiah(taxDue)}
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Pajak Bapenda terutang</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Pajak daerah terutang</p>
         </div>
       </div>
 

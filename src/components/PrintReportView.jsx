@@ -189,7 +189,7 @@ export default function PrintReportView({
                 <div><span className="text-slate-500">Tahun:</span> <strong className="text-slate-900">{year}</strong></div>
               </div>
               <div>
-                <span className="text-slate-500">Tarif Pajak Daerah:</span> <strong className="text-slate-900">{(taxRate * 100).toFixed(0)}% (Bapenda)</strong>
+                <span className="text-slate-500">Tarif Pajak Daerah:</span> <strong className="text-slate-900">{(taxRate * 100).toFixed(0)}%</strong>
               </div>
             </div>
           </div>
@@ -385,7 +385,7 @@ export default function PrintReportView({
                 <div className="grid grid-cols-2 text-center text-[9.5px] pt-1">
                   <div>
                     <p className="text-slate-600">Mengetahui / Menyetujui,</p>
-                    <p className="font-semibold text-slate-800">Petugas Pajak Daerah Bapenda</p>
+                    <p className="font-semibold text-slate-800">Petugas Pajak Daerah</p>
                     <div className="h-10"></div>
                     <p className="font-semibold text-slate-900">( ............................................ )</p>
                     <p className="text-[8.5px] text-slate-500">NIP. ........................................</p>
