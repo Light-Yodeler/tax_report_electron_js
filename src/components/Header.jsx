@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Utensils, FileSpreadsheet, Printer, Download, Settings, RefreshCw, Database, BarChart3, Sun, Moon } from 'lucide-react';
+import { Home, Utensils, FileSpreadsheet, Printer, Download, Settings, RefreshCw, Database, BarChart3, Sun, Moon, LogOut, User } from 'lucide-react';
 
 export default function Header({
   activeUnit,
@@ -14,7 +14,9 @@ export default function Header({
   onOpenSettings,
   onRefresh,
   isExporting,
-  settings
+  settings,
+  currentUser,
+  onLogout
 }) {
   return (
     <header className="no-print bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 px-4 sm:px-6 py-3 transition-colors duration-150">
@@ -167,6 +169,42 @@ export default function Header({
             >
               <Settings className="w-4 h-4" />
             </button>
+
+            {/* Current User & Logout */}
+            {currentUser && (
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                    currentUser.role === 'admin'
+                      ? 'bg-sky-600 text-white'
+                      : 'bg-emerald-600 text-white'
+                  }`}>
+                    {currentUser.full_name?.charAt(0) || 'U'}
+                  </div>
+                  <div className="hidden sm:block text-left leading-tight">
+                    <div className="text-[11px] font-bold text-slate-900 dark:text-white max-w-[100px] truncate">
+                      {currentUser.full_name}
+                    </div>
+                  </div>
+                  <span className={`text-[9px] font-bold uppercase px-1.5 py-0.2 rounded border ${
+                    currentUser.role === 'admin'
+                      ? 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800'
+                      : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800'
+                  }`}>
+                    {currentUser.role}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="p-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-300 dark:border-slate-700 transition"
+                  title="Keluar (Logout)"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
 
         </div>

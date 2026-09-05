@@ -416,3 +416,63 @@ ipcMain.handle('app:printPDF', async (event, unit, year, month, options = {}) =>
     return { success: false, error: err.message };
   }
 });
+
+// ==========================================
+// IPC: AUTHENTICATION & USER MANAGEMENT
+// ==========================================
+ipcMain.handle('auth:getPublicUsers', async () => {
+  try {
+    return await dbService.getPublicUsers();
+  } catch (err) {
+    return [];
+  }
+});
+
+ipcMain.handle('auth:verifyPin', async (event, userId, pin) => {
+  try {
+    return await dbService.verifyUserPin(userId, pin);
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('auth:getAllUsers', async () => {
+  try {
+    return await dbService.getAllUsers();
+  } catch (err) {
+    return [];
+  }
+});
+
+ipcMain.handle('auth:createUser', async (event, userData) => {
+  try {
+    return await dbService.createUser(userData);
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('auth:updateUser', async (event, id, userData) => {
+  try {
+    return await dbService.updateUser(id, userData);
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('auth:deleteUser', async (event, id, currentUserId) => {
+  try {
+    return await dbService.deleteUser(id, currentUserId);
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('auth:changeOwnPin', async (event, userId, oldPin, newPin) => {
+  try {
+    return await dbService.changeOwnPin(userId, oldPin, newPin);
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+

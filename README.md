@@ -51,6 +51,17 @@ Aplikasi ini menyelesaikan alur kerja pelaporan pajak usaha daerah dari hulu ke 
 ### 7. Tampilan Fleksibel
 - Mendukung mode tampilan Terang (Light) dan Gelap (Dark) yang tersimpan secara lokal pada sesi pengguna.
 
+### 8. Nomor Pokok Wajib Pajak Daerah (NPWPD) pada Seluruh Laporan
+- Nomor NPWPD tercetak secara otomatis pada kop surat dan bilah ringkasan meta di formulir pratinjau cetak, berkas ekspor PDF resmi, serta lembar kerja Excel.
+
+### 9. Autentikasi Pengguna dan Pembagian Peran (Role & PIN)
+- Layar masuk interaktif dengan pemilihan profil pengguna langsung dan input kode PIN (dapat diketik melalui keyboard atau numpad layar).
+- Pembagian hak akses sistem:
+  - **Admin**: Akses penuh ke seluruh menu, konfigurasi profil usaha, database, dan tab kelola pengguna (tambah akun, edit peran, ubah PIN, hapus user).
+  - **Staff**: Akses operasional pelaporan (import transaksi, export data, cetak) dengan pembatasan akses pengaturan teknis dan fitur ubah PIN mandiri.
+- Keamanan kata sandi menggunakan enkripsi cryptographic PBKDF2 dengan salt unik per pengguna.
+- Akun bawaan awal: Administrator (PIN: `123456`) dan Staff Pelaporan (PIN: `1234`).
+
 ---
 
 ## Tumpukan Teknologi

@@ -51,6 +51,7 @@ function generateHtmlContent(reportData, settings, unit, year, month, options = 
   const businessName = settings?.businessName || 'ANDA BUNGALOWS & RESTAURANT';
   const businessAddress = settings?.businessAddress || 'Jalan Pariwisata Pantai Kuta, Kecamatan Pujut, Lombok Tengah, NTB';
   const contactNumber = settings?.contactNumber || 'HP/WhatsApp: 087750665000';
+  const npwpd = settings?.npwpd || 'P.2.0001234.01.23';
   const signName = settings?.signName || 'Pimpinan / Pengelola';
 
   // SVG Bar Chart generation with ample margins for axes
@@ -316,12 +317,13 @@ function generateHtmlContent(reportData, settings, unit, year, month, options = 
       <div class="periode-tag">Periode: ${monthName} ${year}</div>
       <h1>LAPORAN PENDAPATAN ${unit.toUpperCase()}</h1>
       <h2>${businessName}</h2>
-      <p>${businessAddress} &bull; ${contactNumber}</p>
+      <p><strong>NPWPD: ${npwpd}</strong> &bull; ${businessAddress} &bull; ${contactNumber}</p>
     </div>
 
     <!-- META BAR -->
     <div class="meta-bar">
       <div>
+        <span>NPWPD: <strong>${npwpd}</strong></span> &nbsp;&nbsp;|&nbsp;&nbsp;
         <span>Bulan: <strong>${monthName}</strong></span> &nbsp;&nbsp;|&nbsp;&nbsp;
         <span>Tahun: <strong>${year}</strong></span>
       </div>

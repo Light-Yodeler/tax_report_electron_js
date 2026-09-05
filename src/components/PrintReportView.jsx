@@ -37,6 +37,7 @@ export default function PrintReportView({
   const businessName = settings?.businessName || 'ANDA BUNGALOWS & RESTAURANT';
   const businessAddress = settings?.businessAddress || 'Jalan Pariwisata Pantai Kuta, Kecamatan Pujut, Lombok Tengah, NTB';
   const contactNumber = settings?.contactNumber || 'HP/WhatsApp: 087750665000';
+  const npwpd = settings?.npwpd || 'P.2.0001234.01.23';
   const signName = settings?.signName || 'Pimpinan / Pengelola';
 
   const chartData = rows.map(r => ({
@@ -174,7 +175,7 @@ export default function PrintReportView({
                   {businessName}
                 </h2>
                 <p className="text-[10.5px] text-slate-500">
-                  {businessAddress} &bull; {contactNumber}
+                  <span className="font-semibold text-slate-700">NPWPD: {npwpd}</span> &bull; {businessAddress} &bull; {contactNumber}
                 </p>
               </div>
               <div className="text-right text-[11px] font-semibold text-slate-700 border border-slate-300 px-2.5 py-1 rounded bg-slate-50">
@@ -184,7 +185,8 @@ export default function PrintReportView({
 
             {/* Meta bar */}
             <div className="flex items-center justify-between mt-2 pt-1 border-t border-slate-200 text-[11px] text-slate-700">
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-5">
+                <div><span className="text-slate-500">NPWPD:</span> <strong className="text-slate-900 font-mono">{npwpd}</strong></div>
                 <div><span className="text-slate-500">Bulan:</span> <strong className="text-slate-900">{monthName}</strong></div>
                 <div><span className="text-slate-500">Tahun:</span> <strong className="text-slate-900">{year}</strong></div>
               </div>

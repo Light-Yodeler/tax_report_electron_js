@@ -240,6 +240,7 @@ async function generateTaxExcelReport(reportBungalows, reportRestaurant, outputP
   const businessName = settings?.businessName || 'ANDA BUNGALOWS & RESTAURANT';
   const businessAddress = settings?.businessAddress || 'Jalan Pariwisata Pantai Kuta, Kecamatan Pujut, Lombok Tengah, NTB';
   const contactNumber = settings?.contactNumber || 'HP/WhatsApp: 087750665000';
+  const npwpd = settings?.npwpd || 'P.2.0001234.01.23';
   const taxRate = parseFloat(settings?.taxRate) || 0.10;
 
   const monthNamesIndo = [
@@ -268,7 +269,7 @@ async function generateTaxExcelReport(reportBungalows, reportRestaurant, outputP
     ws.getCell('C2').alignment = { horizontal: 'center', vertical: 'middle' };
 
     ws.mergeCells('C3:J3');
-    ws.getCell('C3').value = `${businessAddress} | ${contactNumber}`;
+    ws.getCell('C3').value = `NPWPD: ${npwpd} | ${businessAddress} | ${contactNumber}`;
     ws.getCell('C3').font = { name: 'Calibri', size: 9, italic: true, color: { argb: 'FF64748B' } };
     ws.getCell('C3').alignment = { horizontal: 'center', vertical: 'middle' };
 
@@ -285,9 +286,13 @@ async function generateTaxExcelReport(reportBungalows, reportRestaurant, outputP
     ws.getCell('F4').value = 'Tarif Pajak';
     ws.getCell('H4').value = taxRate;
     ws.getCell('H4').numFmt = '0%';
+    ws.getCell('J4').value = 'NPWPD';
+    ws.getCell('K4').value = npwpd;
     ws.getCell('A4').font = { bold: true };
     ws.getCell('D4').font = { bold: true };
     ws.getCell('F4').font = { bold: true };
+    ws.getCell('J4').font = { bold: true };
+    ws.getCell('K4').font = { bold: true };
 
     // 3 Large KPI Summary Cards
     // Card 1: TOTAL PENDAPATAN KOTOR (A6:D6, A7:D8)

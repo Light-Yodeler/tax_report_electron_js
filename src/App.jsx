@@ -8,6 +8,7 @@ import RawDataView from './components/RawDataView';
 import ExcelImportModal from './components/ExcelImportModal';
 import PrintReportView from './components/PrintReportView';
 import SettingsModal from './components/SettingsModal';
+import LoginScreen from './components/LoginScreen';
 import { RefreshCw, FileUp, Sparkles, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { formatRupiah, getMonthName } from './utils/formatters';
 
@@ -48,6 +49,26 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [notification, setNotification] = useState(null); // { type: 'success'|'error', text: '' }
+
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('app_user_session') || sessionStorage.getItem('app_user_session');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
+    showToast(`Selamat datang, ${user.full_name}!`, 'success');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('app_user_session');
+    sessionStorage.removeItem('app_user_session');
+    setCurrentUser(null);
+  };
 
   const showToast = (text, type = 'success') => {
     setNotification({ text, type });
@@ -163,6 +184,17 @@ export default function App() {
     }
   };
 
+  // If not authenticated, render LoginScreen
+  if (!currentUser) {
+    return (
+      <LoginScreen
+        onLoginSuccess={handleLoginSuccess}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col selection:bg-sky-500 selection:text-white transition-colors duration-150">
       
@@ -200,6 +232,8 @@ export default function App() {
           onRefresh={loadReport}
           isExporting={isExporting}
           settings={settings}
+          currentUser={currentUser}
+          onLogout={handleLogout}
         />
       </div>
 
@@ -321,6 +355,7 @@ export default function App() {
         onClose={() => setIsSettingsModalOpen(false)}
         settings={settings}
         onSaveSettings={handleSaveSettings}
+        currentUser={currentUser}
       />
 
     </div>

@@ -35,4 +35,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getSystemInfo: () => ipcRenderer.invoke('app:getSystemInfo'),
   openPath: (targetPath) => ipcRenderer.invoke('app:openPath', targetPath),
   showItemInFolder: (filePath) => ipcRenderer.invoke('app:showItemInFolder', filePath),
+
+  // Authentication & Users
+  getPublicUsers: () => ipcRenderer.invoke('auth:getPublicUsers'),
+  verifyPin: (userId, pin) => ipcRenderer.invoke('auth:verifyPin', userId, pin),
+  getAllUsers: () => ipcRenderer.invoke('auth:getAllUsers'),
+  createUser: (userData) => ipcRenderer.invoke('auth:createUser', userData),
+  updateUser: (id, userData) => ipcRenderer.invoke('auth:updateUser', id, userData),
+  deleteUser: (id, currentUserId) => ipcRenderer.invoke('auth:deleteUser', id, currentUserId),
+  changeOwnPin: (userId, oldPin, newPin) => ipcRenderer.invoke('auth:changeOwnPin', userId, oldPin, newPin),
 });

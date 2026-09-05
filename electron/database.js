@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { app } = require('electron');
 const initSqlJs = require('sql.js');
 
@@ -74,6 +75,17 @@ async function initDatabase() {
       stored_path TEXT,
       imported_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
+
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      pin_hash TEXT NOT NULL,
+      salt TEXT NOT NULL,
+      full_name TEXT NOT NULL,
+      role TEXT NOT NULL CHECK(role IN ('admin', 'staff')),
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      last_login DATETIME
+    );
   `);
 
   // Migrate column stored_path if table was created in earlier version
@@ -81,6 +93,22 @@ async function initDatabase() {
     db.run(`ALTER TABLE import_logs ADD COLUMN stored_path TEXT;`);
   } catch (e) {
     // Column already exists
+  }
+
+  // Seed default users if empty
+  try {
+    const userCountRes = db.exec("SELECT COUNT(*) FROM users;");
+    const userCount = (userCountRes.length > 0 && userCountRes[0].values.length > 0) ? userCountRes[0].values[0][0] : 0;
+    if (userCount === 0) {
+      const adminPin = hashPin('123456');
+      const staffPin = hashPin('1234');
+      db.run(`INSERT INTO users (username, pin_hash, salt, full_name, role) VALUES (?, ?, ?, ?, ?)`,
+        ['admin', adminPin.hash, adminPin.salt, 'Administrator', 'admin']);
+      db.run(`INSERT INTO users (username, pin_hash, salt, full_name, role) VALUES (?, ?, ?, ?, ?)`,
+        ['staff', staffPin.hash, staffPin.salt, 'Staff Pelaporan', 'staff']);
+    }
+  } catch (err) {
+    console.error('Failed to seed default users:', err);
   }
 
   // Default settings
@@ -528,6 +556,157 @@ async function deleteSingleTransaction(id) {
   return { success: true };
 }
 
+// PIN Hashing using built-in Node.js crypto
+function hashPin(pin, salt) {
+  if (!salt) {
+    salt = crypto.randomBytes(16).toString('hex');
+  }
+  const hash = crypto.pbkdf2Sync(String(pin), salt, 10000, 64, 'sha512').toString('hex');
+  return { hash, salt };
+}
+
+// Get public user list for profile selection on login screen
+async function getPublicUsers() {
+  if (!db) await initDatabase();
+  const res = db.exec(`SELECT id, username, full_name, role FROM users ORDER BY role ASC, full_name ASC;`);
+  if (res.length === 0 || res[0].values.length === 0) return [];
+  const cols = res[0].columns;
+  return res[0].values.map(row => {
+    const obj = {};
+    cols.forEach((c, i) => obj[c] = row[i]);
+    return obj;
+  });
+}
+
+// Verify user PIN and return session profile
+async function verifyUserPin(userId, pin) {
+  if (!db) await initDatabase();
+  const res = db.exec(`SELECT id, username, pin_hash, salt, full_name, role FROM users WHERE id = ?;`, [userId]);
+  if (res.length === 0 || res[0].values.length === 0) {
+    return { success: false, error: 'Pengguna tidak ditemukan.' };
+  }
+  const [id, username, pin_hash, salt, full_name, role] = res[0].values[0];
+  const computed = hashPin(String(pin), salt);
+  if (computed.hash !== pin_hash) {
+    return { success: false, error: 'PIN yang Anda masukkan tidak sesuai.' };
+  }
+  db.run(`UPDATE users SET last_login = datetime('now', 'localtime') WHERE id = ?;`, [id]);
+  await saveDb();
+  return {
+    success: true,
+    user: {
+      id,
+      username,
+      full_name,
+      role,
+      last_login: new Date().toISOString()
+    }
+  };
+}
+
+// Admin: Get all users with metadata
+async function getAllUsers() {
+  if (!db) await initDatabase();
+  const res = db.exec(`SELECT id, username, full_name, role, created_at, last_login FROM users ORDER BY role ASC, full_name ASC;`);
+  if (res.length === 0 || res[0].values.length === 0) return [];
+  const cols = res[0].columns;
+  return res[0].values.map(row => {
+    const obj = {};
+    cols.forEach((c, i) => obj[c] = row[i]);
+    return obj;
+  });
+}
+
+// Admin: Create new user
+async function createUser({ username, full_name, role, pin }) {
+  if (!db) await initDatabase();
+  const cleanUsername = String(username || '').trim().toLowerCase();
+  const cleanName = String(full_name || '').trim();
+  const cleanRole = role === 'admin' ? 'admin' : 'staff';
+  const cleanPin = String(pin || '').trim();
+
+  if (!cleanUsername || cleanUsername.length < 3) {
+    return { success: false, error: 'Username minimal 3 karakter.' };
+  }
+  if (!cleanName) {
+    return { success: false, error: 'Nama lengkap wajib diisi.' };
+  }
+  if (!cleanPin || cleanPin.length < 4) {
+    return { success: false, error: 'PIN minimal 4 digit angka.' };
+  }
+
+  const check = db.exec(`SELECT id FROM users WHERE username = ?;`, [cleanUsername]);
+  if (check.length > 0 && check[0].values.length > 0) {
+    return { success: false, error: 'Username sudah digunakan, silakan gunakan username lain.' };
+  }
+
+  const hashed = hashPin(cleanPin);
+  db.run(
+    `INSERT INTO users (username, pin_hash, salt, full_name, role) VALUES (?, ?, ?, ?, ?);`,
+    [cleanUsername, hashed.hash, hashed.salt, cleanName, cleanRole]
+  );
+  await saveDb();
+  return { success: true };
+}
+
+// Admin: Update user
+async function updateUser(id, { full_name, role, pin }) {
+  if (!db) await initDatabase();
+  const cleanName = String(full_name || '').trim();
+  const cleanRole = role === 'admin' ? 'admin' : 'staff';
+
+  if (!cleanName) {
+    return { success: false, error: 'Nama lengkap wajib diisi.' };
+  }
+
+  if (pin && String(pin).trim().length >= 4) {
+    const hashed = hashPin(String(pin).trim());
+    db.run(
+      `UPDATE users SET full_name = ?, role = ?, pin_hash = ?, salt = ? WHERE id = ?;`,
+      [cleanName, cleanRole, hashed.hash, hashed.salt, id]
+    );
+  } else {
+    db.run(
+      `UPDATE users SET full_name = ?, role = ? WHERE id = ?;`,
+      [cleanName, cleanRole, id]
+    );
+  }
+  await saveDb();
+  return { success: true };
+}
+
+// Admin: Delete user
+async function deleteUser(id, currentUserId) {
+  if (!db) await initDatabase();
+  if (Number(id) === Number(currentUserId)) {
+    return { success: false, error: 'Anda tidak dapat menghapus akun yang sedang digunakan.' };
+  }
+  db.run(`DELETE FROM users WHERE id = ?;`, [id]);
+  await saveDb();
+  return { success: true };
+}
+
+// Change user own PIN
+async function changeOwnPin(userId, oldPin, newPin) {
+  if (!db) await initDatabase();
+  const res = db.exec(`SELECT pin_hash, salt FROM users WHERE id = ?;`, [userId]);
+  if (res.length === 0 || res[0].values.length === 0) {
+    return { success: false, error: 'Pengguna tidak ditemukan.' };
+  }
+  const [pin_hash, salt] = res[0].values[0];
+  const oldHashed = hashPin(String(oldPin), salt);
+  if (oldHashed.hash !== pin_hash) {
+    return { success: false, error: 'PIN lama Anda tidak sesuai.' };
+  }
+  if (!newPin || String(newPin).trim().length < 4) {
+    return { success: false, error: 'PIN baru minimal 4 digit angka.' };
+  }
+  const newHashed = hashPin(String(newPin).trim());
+  db.run(`UPDATE users SET pin_hash = ?, salt = ? WHERE id = ?;`, [newHashed.hash, newHashed.salt, userId]);
+  await saveDb();
+  return { success: true };
+}
+
 module.exports = {
   initDatabase,
   getDbPath,
@@ -546,5 +725,12 @@ module.exports = {
   deleteSingleTransaction,
   cleanDuplicateTransactions,
   resetUnitData,
-  resetAllDatabase
+  resetAllDatabase,
+  getPublicUsers,
+  verifyUserPin,
+  getAllUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+  changeOwnPin
 };
