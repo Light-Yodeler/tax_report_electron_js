@@ -39,6 +39,55 @@ async function saveDb() {
 async function initDatabase() {
   const SQL = await initSqlJs();
   const filePath = await getDbPath();
+  const userDataPath = app ? app.getPath('userData') : path.join(__dirname, '..');
+
+  // Automatic safeguard: check for legacy database from previous folder
+  const legacyDir = path.join(path.dirname(userDataPath), 'laporan-bapenda-dispenda');
+  const legacyDb = path.join(legacyDir, 'laporan_bapenda.sqlite');
+
+  if (fs.existsSync(legacyDb)) {
+    try {
+      let needRestore = false;
+      if (!fs.existsSync(filePath)) {
+        needRestore = true;
+      } else {
+        const currentBuffer = fs.readFileSync(filePath);
+        const testDb = new SQL.Database(currentBuffer);
+        const check = testDb.exec("SELECT COUNT(*) FROM transactions;");
+        const count = (check.length > 0 && check[0].values.length > 0) ? check[0].values[0][0] : 0;
+        if (count === 0) {
+          needRestore = true;
+        }
+      }
+
+      if (needRestore) {
+        const legacyBuffer = fs.readFileSync(legacyDb);
+        const testLegacy = new SQL.Database(legacyBuffer);
+        const legCheck = testLegacy.exec("SELECT COUNT(*) FROM transactions;");
+        const legCount = (legCheck.length > 0 && legCheck[0].values.length > 0) ? legCheck[0].values[0][0] : 0;
+        if (legCount > 0) {
+          console.log(`Mengimpor ${legCount} data transaksi dari database sebelumnya...`);
+          fs.copyFileSync(legacyDb, filePath);
+
+          // Copy archive folder if present
+          const legacyArchive = path.join(legacyDir, 'arsip_excel');
+          const currentArchive = await getArchiveDir();
+          if (fs.existsSync(legacyArchive)) {
+            const arcFiles = fs.readdirSync(legacyArchive);
+            for (const f of arcFiles) {
+              const srcF = path.join(legacyArchive, f);
+              const dstF = path.join(currentArchive, f);
+              if (!fs.existsSync(dstF)) {
+                fs.copyFileSync(srcF, dstF);
+              }
+            }
+          }
+        }
+      }
+    } catch (migErr) {
+      console.error('Error during legacy database migration:', migErr);
+    }
+  }
 
   if (fs.existsSync(filePath)) {
     const filebuffer = fs.readFileSync(filePath);
