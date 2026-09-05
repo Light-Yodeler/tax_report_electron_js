@@ -44,4 +44,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   updateUser: (id, userData) => ipcRenderer.invoke('auth:updateUser', id, userData),
   deleteUser: (id, currentUserId) => ipcRenderer.invoke('auth:deleteUser', id, currentUserId),
   changeOwnPin: (userId, oldPin, newPin) => ipcRenderer.invoke('auth:changeOwnPin', userId, oldPin, newPin),
+
+  // Database Backup & Restore
+  backupDatabase: () => ipcRenderer.invoke('db:backupDatabase'),
+  restoreDatabase: () => ipcRenderer.invoke('db:restoreDatabase'),
 });

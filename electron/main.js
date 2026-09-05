@@ -476,3 +476,57 @@ ipcMain.handle('auth:changeOwnPin', async (event, userId, oldPin, newPin) => {
   }
 });
 
+// ==========================================
+// IPC: DATABASE BACKUP & RESTORE
+// ==========================================
+ipcMain.handle('db:backupDatabase', async () => {
+  try {
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10);
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`;
+    const defaultFilename = `Backup_Laporan_Pajak_${dateStr}_${timeStr}.sqlite`;
+
+    const saveResult = await dialog.showSaveDialog(mainWindow, {
+      title: 'Simpan Berkas Cadangan Database (Backup)',
+      defaultPath: defaultFilename,
+      filters: [
+        { name: 'SQLite Database', extensions: ['sqlite', 'db'] },
+        { name: 'Semua Berkas', extensions: ['*'] }
+      ]
+    });
+
+    if (saveResult.canceled || !saveResult.filePath) {
+      return { canceled: true };
+    }
+
+    const res = await dbService.backupDatabaseToFile(saveResult.filePath);
+    return res;
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+ipcMain.handle('db:restoreDatabase', async () => {
+  try {
+    const openResult = await dialog.showOpenDialog(mainWindow, {
+      title: 'Pilih Berkas Cadangan Database untuk Dipulihkan (Restore)',
+      properties: ['openFile'],
+      filters: [
+        { name: 'SQLite Database / Backup', extensions: ['sqlite', 'db', 'bak'] },
+        { name: 'Semua Berkas', extensions: ['*'] }
+      ]
+    });
+
+    if (openResult.canceled || openResult.filePaths.length === 0) {
+      return { canceled: true };
+    }
+
+    const selectedFile = openResult.filePaths[0];
+    const res = await dbService.restoreDatabaseFromFile(selectedFile);
+    return res;
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+});
+
+

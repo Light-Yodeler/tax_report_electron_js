@@ -756,6 +756,69 @@ async function changeOwnPin(userId, oldPin, newPin) {
   return { success: true };
 }
 
+// Backup current database to destination path
+async function backupDatabaseToFile(destPath) {
+  if (!db) await initDatabase();
+  await saveDb();
+  const currentDbPath = await getDbPath();
+  fs.copyFileSync(currentDbPath, destPath);
+  const stats = fs.statSync(destPath);
+  const totalCount = await getTotalTransactionsCount();
+  return {
+    success: true,
+    filePath: destPath,
+    fileSize: stats.size,
+    totalTransactions: totalCount
+  };
+}
+
+// Restore database from a backup file with safety verification
+async function restoreDatabaseFromFile(backupFilePath) {
+  if (!fs.existsSync(backupFilePath)) {
+    return { success: false, error: 'Berkas cadangan tidak ditemukan.' };
+  }
+
+  // 1. Verify that backup file is valid SQLite and contains transactions table
+  const SQL = await initSqlJs();
+  let backupBuffer;
+  let testDb;
+  try {
+    backupBuffer = fs.readFileSync(backupFilePath);
+    testDb = new SQL.Database(backupBuffer);
+    const check = testDb.exec("SELECT COUNT(*) FROM transactions;");
+    if (!check || check.length === 0) {
+      return { success: false, error: 'Berkas tidak valid: tabel transaksi tidak ditemukan.' };
+    }
+  } catch (err) {
+    return { success: false, error: 'Berkas cadangan rusak atau bukan database SQLite yang valid.' };
+  }
+
+  // 2. Safety snapshot of current DB before replacing
+  const currentDbPath = await getDbPath();
+  if (fs.existsSync(currentDbPath)) {
+    const safetyBackup = currentDbPath + '.pre_restore.bak';
+    try {
+      fs.copyFileSync(currentDbPath, safetyBackup);
+    } catch (e) {
+      console.warn('Could not create safety snapshot:', e);
+    }
+  }
+
+  // 3. Write backup to current path and re-initialize
+  fs.writeFileSync(currentDbPath, backupBuffer);
+  db = new SQL.Database(backupBuffer);
+
+  // 4. Ensure tables and user migrations
+  await initDatabase();
+
+  const totalCount = await getTotalTransactionsCount();
+  return {
+    success: true,
+    filePath: currentDbPath,
+    totalTransactions: totalCount
+  };
+}
+
 module.exports = {
   initDatabase,
   getDbPath,
@@ -781,5 +844,7 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
-  changeOwnPin
+  changeOwnPin,
+  backupDatabaseToFile,
+  restoreDatabaseFromFile
 };

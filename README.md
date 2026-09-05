@@ -62,6 +62,13 @@ Aplikasi ini menyelesaikan alur kerja pelaporan pajak usaha daerah dari hulu ke 
 - Keamanan kata sandi menggunakan enkripsi cryptographic PBKDF2 dengan salt unik per pengguna.
 - Akun bawaan awal: Administrator (PIN: `123456`) dan Staff Pelaporan (PIN: `1234`).
 
+### 10. Cadangan dan Pemulihan Data (Backup & Restore)
+- Ekspor salinan database SQLite secara mandiri ke media penyimpanan eksternal, flashdisk, atau direktori cadangan dengan penamaan stempel waktu otomatis.
+- Pemulihan database dari berkas cadangan (.sqlite / .db / .bak) dengan verifikasi validitas struktur database terlebih dahulu sebelum proses penggantian file berjalan.
+- Mekanisme perlindungan data otomatis dengan pembuatan cadangan darurat (`.pre_restore.bak`) sebelum file database aktif ditimpa.
+- Pembaruan antarmuka secara langsung tanpa perlu memulai ulang aplikasi saat pemulihan berhasil diselesaikan.
+- Fitur pencadangan dan pemulihan dibatasi khusus untuk pengguna dengan hak akses Administrator.
+
 ---
 
 ## Tumpukan Teknologi

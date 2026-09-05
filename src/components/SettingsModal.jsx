@@ -15,10 +15,12 @@ import {
   Trash2,
   Edit3,
   AlertCircle,
-  ShieldCheck
+  ShieldCheck,
+  Download,
+  RefreshCw
 } from 'lucide-react';
 
-export default function SettingsModal({ isOpen, onClose, settings, onSaveSettings, currentUser }) {
+export default function SettingsModal({ isOpen, onClose, settings, onSaveSettings, currentUser, onRestoreSuccess }) {
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'storage' | 'users' | 'security'
   const [formData, setFormData] = useState({
     businessName: '',
@@ -50,6 +52,11 @@ export default function SettingsModal({ isOpen, onClose, settings, onSaveSetting
     confirmPin: ''
   });
   const [pinMsg, setPinMsg] = useState(null);
+
+  // Backup & Restore State
+  const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [backupMsg, setBackupMsg] = useState(null);
 
   useEffect(() => {
     if (settings) {
@@ -209,6 +216,61 @@ export default function SettingsModal({ isOpen, onClose, settings, onSaveSetting
       }
     } catch (err) {
       setPinMsg({ text: err.message || 'Terjadi kesalahan.', type: 'error' });
+    }
+  };
+
+  const handleBackup = async () => {
+    setBackupMsg(null);
+    setIsBackingUp(true);
+    try {
+      if (window.electronAPI?.backupDatabase) {
+        const res = await window.electronAPI.backupDatabase();
+        if (res.success) {
+          setBackupMsg({
+            text: `Cadangan database berhasil disimpan (${res.totalTransactions || 0} baris transaksi) ke: ${res.filePath}`,
+            type: 'success'
+          });
+        } else if (!res.canceled) {
+          setBackupMsg({ text: res.error || 'Gagal membuat cadangan database.', type: 'error' });
+        }
+      }
+    } catch (err) {
+      setBackupMsg({ text: err.message || 'Terjadi kesalahan saat backup.', type: 'error' });
+    } finally {
+      setIsBackingUp(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    setBackupMsg(null);
+    if (!window.confirm('PERINGATAN: Memulihkan database akan menggantikan data transaksi saat ini dengan data dari file cadangan yang Anda pilih. Apakah Anda yakin ingin melanjutkan?')) {
+      return;
+    }
+
+    setIsRestoring(true);
+    try {
+      if (window.electronAPI?.restoreDatabase) {
+        const res = await window.electronAPI.restoreDatabase();
+        if (res.success) {
+          setBackupMsg({
+            text: `Database berhasil dipulihkan! Total ${res.totalTransactions || 0} baris transaksi aktif dimuat.`,
+            type: 'success'
+          });
+          if (window.electronAPI?.getSystemInfo) {
+            const sys = await window.electronAPI.getSystemInfo();
+            if (sys?.success) setSystemInfo(sys.data);
+          }
+          if (onRestoreSuccess) {
+            onRestoreSuccess();
+          }
+        } else if (!res.canceled) {
+          setBackupMsg({ text: res.error || 'Gagal memulihkan database.', type: 'error' });
+        }
+      }
+    } catch (err) {
+      setBackupMsg({ text: err.message || 'Terjadi kesalahan saat pemulihan database.', type: 'error' });
+    } finally {
+      setIsRestoring(false);
     }
   };
 
@@ -513,6 +575,61 @@ export default function SettingsModal({ isOpen, onClose, settings, onSaveSetting
               <div className="p-2 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 break-all font-mono text-[11px] text-slate-600 dark:text-slate-300 select-all">
                 {systemInfo?.archiveDir || 'Memuat path arsip...'}
               </div>
+            </div>
+
+            {/* Backup & Restore Data Section */}
+            <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                  <span className="font-bold text-slate-900 dark:text-slate-100 text-xs">Cadangan & Pemulihan Data (Backup & Restore)</span>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Amankan seluruh data pembukuan Anda secara berkala ke flashdisk atau penyimpanan eksternal, atau pulihkan data dari berkas cadangan sebelumnya.
+                </p>
+              </div>
+
+              {backupMsg && (
+                <div className={`p-2.5 rounded-lg border text-xs font-semibold ${
+                  backupMsg.type === 'error'
+                    ? 'bg-rose-50 border-rose-200 text-rose-700 dark:bg-rose-950 dark:border-rose-900 dark:text-rose-200'
+                    : 'bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-950 dark:border-emerald-900 dark:text-emerald-200'
+                }`}>
+                  {backupMsg.text}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                {/* Backup Button */}
+                <button
+                  type="button"
+                  onClick={handleBackup}
+                  disabled={isBackingUp || currentUser?.role !== 'admin'}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl border border-sky-200 dark:border-sky-800 bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/60 transition shadow-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                  title="Simpan file database ke flashdisk atau folder lain"
+                >
+                  <Download className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                  <span>{isBackingUp ? 'Menyimpan...' : 'Cadangkan Database (Backup)'}</span>
+                </button>
+
+                {/* Restore Button */}
+                <button
+                  type="button"
+                  onClick={handleRestore}
+                  disabled={isRestoring || currentUser?.role !== 'admin'}
+                  className="flex items-center justify-center gap-2 p-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/60 transition shadow-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+                  title="Pulihkan database dari file cadangan sebelumnya"
+                >
+                  <RefreshCw className={`w-4 h-4 text-amber-600 dark:text-amber-400 ${isRestoring ? 'animate-spin' : ''}`} />
+                  <span>{isRestoring ? 'Memulihkan...' : 'Pulihkan Database (Restore)'}</span>
+                </button>
+              </div>
+
+              {currentUser?.role !== 'admin' && (
+                <p className="text-[10.5px] text-slate-400 italic">
+                  * Fitur backup dan restore hanya dapat diakses oleh Administrator.
+                </p>
+              )}
             </div>
           </div>
         )}

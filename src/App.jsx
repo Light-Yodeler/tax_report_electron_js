@@ -356,6 +356,10 @@ export default function App() {
         settings={settings}
         onSaveSettings={handleSaveSettings}
         currentUser={currentUser}
+        onRestoreSuccess={() => {
+          loadReport();
+          showToast('Database berhasil dipulihkan! Seluruh data transaksi telah diperbarui.', 'success');
+        }}
       />
 
     </div>

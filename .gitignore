@@ -10,6 +10,7 @@ release/
 *.sqlite
 *.sqlite-journal
 *.db
+*.bak
 arsip_excel/
 
 # macOS files
